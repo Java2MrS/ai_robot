@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/css/chat.css"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>聊天助手</title>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+    <script>
+        window.onload=function(){
+            $(".arrow").hide();
+            $(".arrows").hide();
+        }
+        document.onkeydown = function(e) {
+            if (e.keyCode == 13 && e.ctrlKey) {
+                // 这里实现换行
+                document.getElementById("sendContent").value += "\n";
+            } else if (e.keyCode == 13) {
+                // 避免回车键换行
+                e.preventDefault();
+                // 下面写你的发送消息的代码
+                f();
+            }
+        }
+        function f() {
+            var cnt = $("#sendContent").val();
+            if(cnt == '')alert('内容不能为空');
+            if(cnt != ''){
+                var node = document.createElement('div');
+                node.className = 'sendChat';
+                var span = document.createElement('span');
+                span.innerHTML = cnt;
+                var arrow = document.createElement('div');
+                arrow.className = 'arrows';
+                node.appendChild(span);
+                node.appendChild(arrow);
+                $(".border-second").append($(node));
+                $("#sendContent").val('');
+                $.ajax({
+                    data : {'cnt':cnt},
+                    type : "post",
+                    url : "chat",
+                    dataType : "json",
+                    success : function(msg) {
+                        //alert(msg.results[0].values.text);
+                        var node = document.createElement('div');
+                        node.className = 'replyChat';
+                        var span = document.createElement('span');
+                        span.innerHTML = msg.results[0].values.text;
+                        var arrow = document.createElement('div');
+                        arrow.className = 'arrow';
+                        node.appendChild(arrow);
+                        node.appendChild(span);
+
+                        $(".border-second").append($(node));
+
+                        var boderSecondDiv = $('.border-second');
+                        var lastChild = boderSecondDiv[0].lastChild;
+                        var lastChildH = lastChild.offsetTop;
+                        var h = 0;
+                        for (var i = 0, len = lastChild.children.length; i < len; i++) {
+
+                            h += lastChild.children[i].offsetHeight;
+                        }
+                        boderSecondDiv[0].scrollTop = lastChildH + h;
+
+                    },
+                    error : function(msg) {
+                        alert("请求失败");
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+
+<div class="frame">
+    <div class="border">
+        <div class="border-next">
+            <div class="people">聊天助手</div>
+        </div>
+        <div class="border-second">
+            <div class="chatCnt">
+                <div class="chatTouXiang"></div>
+                <div class="sendChat">
+                    <span></span>
+                    <div class="arrows"></div>
+                </div>
+            </div>
+            <div class="replyChat">
+                <span></span>
+                <div class="arrow"></div>
+            </div>
+            <br>
+        </div>
+        <div class="border-img"></div>
+        <textarea id="sendContent" class="border-bottom"></textarea>
+        <div class="button">
+            <button class="shut">关闭</button>
+            <button id="selectBtn" class="send" onclick="f()">发送</button>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
